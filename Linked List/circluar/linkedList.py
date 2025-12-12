@@ -8,7 +8,7 @@ class CircularSinglyLinkedList:
     def __init__(self):
         self.head = None
 
-    # ---------- Basic Utilities ----------
+    # Misc
     def isempty(self):
         return self.head is None
 
@@ -47,7 +47,7 @@ class CircularSinglyLinkedList:
             current = current.next
         return current.data
 
-    # ---------- Adding Nodes ----------
+    #Add
     def append(self, value):
         new = CNode(value)
         if self.isempty():
@@ -92,23 +92,20 @@ class CircularSinglyLinkedList:
         new.next = current.next
         current.next = new
 
-    # ---------- Deletion ----------
+    # Delete
     def pop(self, index=None):
         if self.isempty():
             print("Empty CSLL")
             return
-        # Only one node
         if self.head.next == self.head:
             self.head = None
             return
-        # Remove last
         if index is None:
             current = self.head
             while current.next.next != self.head:
                 current = current.next
             current.next = self.head
             return
-        # Remove head
         if index == 0:
             tail = self.head
             while tail.next != self.head:
@@ -116,7 +113,6 @@ class CircularSinglyLinkedList:
             self.head = self.head.next
             tail.next = self.head
             return
-        # Remove at index
         current = self.head
         i = 0
         while i < index - 1 and current.next != self.head:
@@ -135,7 +131,7 @@ class CircularSinglyLinkedList:
         prev = None
         while True:
             if current.data == value:
-                if prev is None:  # deleting head
+                if prev is None:  
                     tail = self.head
                     while tail.next != self.head:
                         tail = tail.next
@@ -158,14 +154,14 @@ class CircularSinglyLinkedList:
         while True:
             next_node = current.next
             if current.data == value:
-                if prev is None:  # deleting head
+                if prev is None: 
                     tail = self.head
                     while tail.next != self.head:
                         tail = tail.next
                     self.head = current.next
                     tail.next = self.head
                     current = self.head
-                    if self.head == next_node:  # only node
+                    if self.head == next_node:  
                         break
                     continue
                 else:
@@ -179,7 +175,7 @@ class CircularSinglyLinkedList:
     def clear(self):
         self.head = None
 
-    # ---------- Search ----------
+    #search
     def __contains__(self, value):
         if self.isempty():
             return False
@@ -208,7 +204,7 @@ class CircularSinglyLinkedList:
         print("Not Found")
         return None
 
-    # ---------- Reverse ----------
+    #Reverse
     def reverse(self):
         if self.isempty() or self.head.next == self.head:
             return
@@ -225,7 +221,7 @@ class CircularSinglyLinkedList:
         self.head.next = prev
         self.head = prev
 
-    # ---------- Advanced ----------
+
     def mid(self):
         if self.isempty():
             print("Empty CSLL")
