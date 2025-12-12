@@ -17,4 +17,3 @@ def mergesort(nums):
     merged.extend(right[j:])
     return merged
 
-print(mergesort([2,4,5,3,5,3,5,7,3,2]))
