@@ -5,12 +5,11 @@
 5
 6        prefix=strs[0]
 7        for word in strs[1:]:
-8            for letter in range(min(len(word),len(prefix))):
-9                if prefix[letter]!=word[letter]:
-10                    prefix=prefix[:letter]
-11                    break
-12            prefix = prefix[:min(len(prefix), len(word))]
-13        return prefix
-14                
-15
-16        
+8            while not word.startswith(prefix):
+9                prefix=prefix[:-1]
+10                if prefix=='':
+11                    return ''
+12        return prefix
+13                
+14
+15        
