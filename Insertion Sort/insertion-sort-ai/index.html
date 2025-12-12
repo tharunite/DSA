@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insertion Sort Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="title">
+        <div class="badge">Insertion Sort</div>
+        <h1>Interactive Visualizer</h1>
+      </div>
+      <div class="note">Enter numbers, run the sort, and follow each step.</div>
+    </header>
+
+    <section class="layout single" id="layout">
+      <div class="card input-card">
+        <h2>1) Enter your array</h2>
+        <label for="array-input">Numbers separated by commas (e.g., 9, 5, 2, 7)</label>
+        <input id="array-input" class="input" type="text" placeholder="Enter numbers..." />
+        <div class="actions">
+          <button id="run-btn" class="button">
+            <span>Run Insertion Sort</span>
+          </button>
+          <div class="status" id="status-text">Waiting for input…</div>
+        </div>
+        <div class="error" id="error-text" aria-live="polite"></div>
+      </div>
+
+      <div class="card info-card tall-card hidden" id="info-card">
+        <div class="card-header">
+          <h2>What is Insertion Sort?</h2>
+          <button class="collapse-toggle" id="info-toggle" aria-expanded="true" aria-controls="info-content">Hide</button>
+        </div>
+        <div class="info-card-content card-body" id="info-content">
+          <p>Insertion sort builds the sorted list one item at a time, inserting each element into its proper position within the already-sorted left portion.</p>
+          <div class="muted label">Algorithm intuition</div>
+          <ul class="info-bullets">
+            <li>Think of sorting playing cards in your hand: pick the next card and slot it into the correct place among the ones you already ordered.</li>
+            <li>Works in-place: it reorders elements inside the same array with O(1) extra space.</li>
+            <li>Stable: equal elements keep their original relative order.</li>
+          </ul>
+          <div class="info-grid">
+            <div>
+              <div class="muted label">Time Complexity</div>
+              <ul>
+                <li>Worst: O(n²)</li>
+                <li>Average: O(n²)</li>
+                <li>Best (nearly sorted): O(n)</li>
+              </ul>
+            </div>
+            <div>
+              <div class="muted label">Space Complexity</div>
+              <ul>
+                <li>O(1) extra space</li>
+              </ul>
+            </div>
+            <div>
+              <div class="muted label">Stability</div>
+              <ul>
+                <li>Stable (keeps equal items in order)</li>
+              </ul>
+            </div>
+            <div>
+              <div class="muted label">Use Cases</div>
+              <ul>
+                <li>Small arrays</li>
+                <li>Nearly sorted data</li>
+                <li>Streaming/online insertion</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card tall-card hidden steps-card" id="result-card">
+        <div class="steps-header card-header">
+          <div>
+            <h2>2) Steps & Result</h2>
+            <div class="hint">Shows picks, comparisons, shifts, inserts.</div>
+          </div>
+          <button class="collapse-toggle" id="steps-toggle" aria-expanded="true" aria-controls="steps-content">Hide</button>
+        </div>
+        <div class="card-body" id="steps-content">
+          <div id="sorted-pill" class="pill"></div>
+          <div id="steps-list" class="list compact"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

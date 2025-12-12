@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Merge Sort Step Visualizer</title>
+<style>
+  :root{
+    --bg:#0f1724; --card:#111827; --muted:#9ca3af; --accent:#7c3aed; --panel:#0b1220; --glass: rgba(255,255,255,0.02);
+    --success:#10b981; --danger:#ef4444;
+  }
+  html,body{height:100%; margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: linear-gradient(180deg,#071021 0%, #071426 60%); color:#e6eef8}
+  .app{max-width:1100px; margin:28px auto; display:grid; grid-template-columns: 420px 1fr 300px; gap:18px; padding:18px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px; box-shadow: 0 6px 18px rgba(2,6,23,0.6); padding:16px}
+  h2{margin:0 0 10px 0; font-size:18px}
+  .input-row{display:flex; gap:8px; align-items:center}
+  input[type=text]{flex:1; padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:inherit}
+  button{background:linear-gradient(90deg,var(--accent),#5b21b6); border:none; color:white; padding:10px 12px; border-radius:10px; cursor:pointer}
+  .small{font-size:13px; color:var(--muted)}
+
+  /* Steps panel */
+  .steps{height:560px; overflow:auto; padding:10px; border-radius:10px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));}
+  .step{border-radius:8px; padding:10px; margin-bottom:10px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02)}
+  .step .title{display:flex; justify-content:space-between; gap:8px; font-weight:600}
+  .step .meta{font-size:12px; color:var(--muted); margin-top:6px}
+  .snapshot{margin-top:8px; font-family: monospace; background:rgba(0,0,0,0.15); padding:8px; border-radius:6px;}
+
+  /* Right info */
+  .info{height:760px; overflow:auto; padding:12px}
+  .pill{display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(255,255,255,0.03); color:var(--muted); font-size:12px}
+
+  /* visual array row */
+  .array-row{display:flex; gap:8px; margin-top:10px}
+  .cell{min-width:40px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.02); font-weight:600}
+  .highlight{background:linear-gradient(90deg,#111827,#0b1220); box-shadow:0 4px 10px rgba(0,0,0,0.6); border-color:var(--accent)}
+
+  /* control footer */
+  .controls{display:flex; gap:8px; margin-top:12px}
+  .btn-ghost{background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); padding:8px 10px; border-radius:8px}
+
+  .tabs{display:flex; gap:8px; margin-bottom:8px}
+  .tab{padding:8px 10px; border-radius:8px; background:rgba(255,255,255,0.01); cursor:pointer}
+  .tab.active{background:linear-gradient(90deg,#111827,#0b1220); border:1px solid rgba(255,255,255,0.02)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="card">
+    <h2>1) Enter array</h2>
+    <div class="small">Numbers separated by commas (e.g., 9,4,7,1,5)</div>
+    <div style="height:12px"></div>
+    <div class="input-row">
+      <input id="arrInput" type="text" value="9,4,7,1,5" />
+      <button id="runBtn">Run Merge Sort</button>
+    </div>
+    <div class="controls">
+      <button class="btn-ghost" id="stepBtn">Step</button>
+      <button class="btn-ghost" id="playBtn">Play</button>
+      <button class="btn-ghost" id="resetBtn">Reset</button>
+      <div style="flex:1"></div>
+      <div class="pill" id="statusPill">Ready</div>
+    </div>
+
+    <div style="height:14px"></div>
+    <h2>2) Steps & Result</h2>
+    <div class="small">Shows calls, splits, compares, appends and snapshots.</div>
+    <div class="steps" id="stepsPanel"></div>
+  </div>
+
+  <div class="card" style="padding:18px;">
+    <h2>Live Snapshot</h2>
+    <div class="small">Click any step to view arrays and merged state at that moment.</div>
+    <div style="height:12px"></div>
+    <div>
+      <strong>Current view:</strong> <span id="currentView">(none)</span>
+    </div>
+    <div class="array-row" id="liveArrays" style="margin-top:14px"></div>
+    <div style="height:12px"></div>
+    <div id="liveDetails" class="small"></div>
+  </div>
+
+  <div class="card info">
+    <h2>What is Merge Sort?</h2>
+    <p class="small">Divide &amp; conquer algorithm. Recursively splits array, sorts halves, then merges.</p>
+    <div style="height:8px"></div>
+    <div><strong>Time:</strong> O(n log n)</div>
+    <div><strong>Space:</strong> O(n) extra</div>
+    <div style="height:12px"></div>
+    <div class="tabs">
+      <div class="tab active" data-tab="how">How</div>
+      <div class="tab" data-tab="tips">Tips</div>
+    </div>
+    <div id="tabHow">
+      <ol class="small">
+        <li>Split until size 1.</li>
+        <li>Merge two sorted lists by repeated comparisons.</li>
+        <li>Use temporary array to build merged result.</li>
+      </ol>
+    </div>
+    <div id="tabTips" style="display:none" class="small">
+      <ul>
+        <li>Stable sort.</li>
+        <li>Better for linked lists in-place merging.</li>
+        <li>Predictable worst-case.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+// trace-enabled merge sort that outputs an ordered list of step objects
+function mergesortTrace(nums) {
+  const steps = [];
+  let id = 1;
+
+  function note(type, depth, info, snapshot) {
+    steps.push({ id: id++, type, depth, info: info || {}, snapshot: snapshot || {} });
+  }
+
+  function _ms(arr, depth) {
+    note('call', depth, { arr: arr.slice() }, { arr: arr.slice() });
+    if (arr.length <= 1) {
+      note('return', depth, { reason: 'base', result: arr.slice() }, { result: arr.slice() });
+      return arr.slice();
+    }
+    const mid = Math.floor(arr.length / 2);
+    note('split', depth, { mid, left: arr.slice(0, mid), right: arr.slice(mid) }, { left: arr.slice(0, mid), right: arr.slice(mid) });
+
+    const left = _ms(arr.slice(0, mid), depth + 1);
+    const right = _ms(arr.slice(mid), depth + 1);
+
+    // merge phase
+    let merged = [];
+    let i = 0, j = 0;
+    note('merge_start', depth, { left: left.slice(), right: right.slice() }, { merged: merged.slice() });
+
+    while (i < left.length && j < right.length) {
+      note('compare', depth, { leftVal: left[i], rightVal: right[j], i, j }, { left: left.slice(), right: right.slice(), merged: merged.slice() });
+      if (left[i] <= right[j]) {
+        merged.push(left[i]);
+        note('append', depth, { value: left[i], from: 'left', i }, { merged: merged.slice() });
+        i++;
+      } else {
+        merged.push(right[j]);
+        note('append', depth, { value: right[j], from: 'right', j }, { merged: merged.slice() });
+        j++;
+      }
+    }
+    if (i < left.length) {
+      note('leftover', depth, { side: 'left', values: left.slice(i) }, { merged: merged.slice() });
+      merged = merged.concat(left.slice(i));
+    }
+    if (j < right.length) {
+      note('leftover', depth, { side: 'right', values: right.slice(j) }, { merged: merged.slice() });
+      merged = merged.concat(right.slice(j));
+    }
+
+    note('merged', depth, { result: merged.slice() }, { merged: merged.slice() });
+    note('return', depth, { reason: 'merged', result: merged.slice() }, { result: merged.slice() });
+    return merged;
+  }
+
+  const sorted = _ms(nums.slice(), 0);
+  note('done', 0, { result: sorted.slice() }, { result: sorted.slice() });
+  return { sorted, steps };
+}
+
+// Rendering and UI logic
+const runBtn = document.getElementById('runBtn');
+const stepBtn = document.getElementById('stepBtn');
+const playBtn = document.getElementById('playBtn');
+const resetBtn = document.getElementById('resetBtn');
+const arrInput = document.getElementById('arrInput');
+const stepsPanel = document.getElementById('stepsPanel');
+const statusPill = document.getElementById('statusPill');
+const liveArrays = document.getElementById('liveArrays');
+const liveDetails = document.getElementById('liveDetails');
+const currentView = document.getElementById('currentView');
+
+let trace = null;
+let cursor = 0;
+let timer = null;
+
+function parseInput() {
+  const raw = arrInput.value.trim();
+  if (!raw) return [];
+  return raw.split(',').map(s => parseInt(s.trim(), 10)).filter(x => !Number.isNaN(x));
+}
+
+function renderStepsList(steps) {
+  stepsPanel.innerHTML = '';
+  steps.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'step';
+    const title = document.createElement('div');
+    title.className = 'title';
+    title.textContent = `${s.id}. ${s.type}`;
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = JSON.stringify(s.info);
+    const snap = document.createElement('pre');
+    snap.className = 'snapshot';
+    snap.textContent = JSON.stringify(s.snapshot);
+    el.appendChild(title);
+    el.appendChild(meta);
+    el.appendChild(snap);
+    el.addEventListener('click', () => showSnapshot(s));
+    stepsPanel.appendChild(el);
+  });
+}
+
+function showSnapshot(step) {
+  currentView.textContent = `${step.id} — ${step.type}`;
+  liveArrays.innerHTML = '';
+  const snap = step.snapshot || {};
+  // show arrays: arr, left, right, merged, result if present
+  const rows = ['arr','left','right','merged','result'];
+  rows.forEach(r => {
+    if (snap[r] && Array.isArray(snap[r])) {
+      const wrapper = document.createElement('div');
+      wrapper.style.marginBottom = '8px';
+      const lab = document.createElement('div'); lab.className='small'; lab.textContent = r;
+      wrapper.appendChild(lab);
+      const row = document.createElement('div'); row.className='array-row';
+      snap[r].forEach(v => {
+        const c = document.createElement('div'); c.className='cell'; c.textContent = v;
+        row.appendChild(c);
+      });
+      wrapper.appendChild(row);
+      liveArrays.appendChild(wrapper);
+    }
+  });
+  liveDetails.textContent = JSON.stringify(step.info);
+}
+
+function setStatus(t) { statusPill.textContent = t; }
+
+runBtn.addEventListener('click', ()=>{
+  const arr = parseInput();
+  trace = mergesortTrace(arr);
+  cursor = 0;
+  setStatus('Trace ready — ' + trace.steps.length + ' steps');
+  renderStepsList(trace.steps);
+});
+
+stepBtn.addEventListener('click', ()=>{
+  if (!trace) return;
+  if (cursor >= trace.steps.length) { setStatus('End of trace'); return; }
+  const step = trace.steps[cursor++];
+  showSnapshot(step);
+  setStatus(`Step ${step.id}: ${step.type}`);
+});
+
+playBtn.addEventListener('click', ()=>{
+  if (!trace) return;
+  if (timer) { clearInterval(timer); timer = null; playBtn.textContent='Play'; setStatus('Paused'); return; }
+  playBtn.textContent='Pause';
+  timer = setInterval(()=>{
+    if (cursor >= trace.steps.length) { clearInterval(timer); timer=null; playBtn.textContent='Play'; setStatus('Finished'); return; }
+    const step = trace.steps[cursor++];
+    showSnapshot(step);
+    // auto-scroll steps panel
+    const node = stepsPanel.children[cursor-1]; if (node) node.scrollIntoView({behavior:'smooth', block:'center'});
+    setStatus(`Step ${step.id}: ${step.type}`);
+  }, 650);
+});
+
+resetBtn.addEventListener('click', ()=>{
+  trace = null; cursor = 0; stepsPanel.innerHTML=''; liveArrays.innerHTML=''; liveDetails.textContent=''; currentView.textContent='(none)'; setStatus('Ready'); if (timer) { clearInterval(timer); timer=null; playBtn.textContent='Play'; }
+});
+
+// tabs
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('tabHow').style.display = t.dataset.tab==='how' ? '' : 'none';
+  document.getElementById('tabTips').style.display = t.dataset.tab==='tips' ? '' : 'none';
+}));
+
+// initialize
+setStatus('Ready');
+</script>
+</body>
+</html>
